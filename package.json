@@ -1,0 +1,7 @@
+{
+  "name": "wholesale-platform",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
+}
