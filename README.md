@@ -1,90 +1,68 @@
-# Wholesale Business Management Platform
+# Wholesale Business Management Platform (Next.js)
 
 ## About the Project
 
-This project is a specialized SaaS platform designed for FMCG Master Distributors in Pakistan. It aims to replace inefficient manual systems like Excel and paper ledgers with a simple, "perfect-fit" solution. The platform will help reduce manual payment reconciliation, decrease order fulfillment errors, and provide real-time data for better business decisions.
+This project is a specialized SaaS platform designed for FMCG Master Distributors in Pakistan. This repository contains the monorepo for the project, built with Next.js, Turborepo, and Supabase.
+
+## Tech Stack
+
+*   **Framework:** [Next.js](https://nextjs.org/)
+*   **Monorepo:** [Turborepo](https://turbo.build/repo)
+*   **Authentication:** [Supabase Auth](https://supabase.com/auth)
+*   **Database:** [Supabase Postgres](https://supabase.com/database)
+*   **ORM:** [Prisma](https://www.prisma.io/)
+*   **UI:** [React](https://reactjs.org/) (with a shared component library in `packages/ui`)
 
 ## Getting Started
 
-To get a local copy up and running, follow these simple steps.
+To get a local copy up and running, follow these steps.
 
 ### Prerequisites
 
-You need to have the following software installed on your machine:
-*   [Node.js](https://nodejs.org/) (which includes npm)
-*   [Docker](https://www.docker.com/)
+*   [Node.js](https://nodejs.org/) (v18 or higher)
+*   [npm](https://www.npmjs.com/) (or your package manager of choice)
 *   A [Supabase](https://supabase.com/) account and project.
 
 ### Environment Variables
 
-This project uses environment variables to connect to Supabase services.
+This project requires environment variables to connect to Supabase.
 
-1.  **Frontend (`web` package):** Create a `.env` file inside the `packages/web` directory by copying the example file:
+1.  **Web Frontend:** In the `apps/web` directory, create a `.env` file by copying the example:
     ```sh
-    cp packages/web/.env.example packages/web/.env
+    cp apps/web/.env.example apps/web/.env
     ```
-    You will need to fill this file with your Supabase Project URL and Anon Key.
+    Fill this file with your Supabase Project URL and Anon Key.
 
-2.  **Backend (`api` service):** The backend needs a direct connection string to the database. You must update the `DATABASE_URL` environment variable inside the `docker-compose.yml` file to point to your Supabase database. You can find this in your Supabase project's database settings.
+2.  **Database Migrations:** To run database migrations, you need a direct connection string to the database. Create a `.env` file in the `packages/db` directory:
+    ```
+    packages/db/.env
+    ```
+    Add your Supabase database connection string to this file:
+    ```
+    DATABASE_URL="your-supabase-database-connection-string"
+    ```
 
 ### Installation
 
-1.  Clone the repo.
-2.  Install NPM packages from the root of the monorepo:
-    ```sh
-    npm install
-    ```
+Install all dependencies from the root of the monorepo:
+```sh
+npm install
+```
 
-## Running the Application
+## Development
 
-The entire application stack can be run using Docker Compose. This will build the container images for the `api` and `web` services and start them.
+To start the development server for the web application, run the following command from the root of the project:
 
 ```sh
-docker-compose up
+npm run dev
 ```
-*   The `api` service will be available at `http://localhost:3001`
-*   The `web` service will be available at `http://localhost:8080`
+This will start the Next.js application, usually available at `http://localhost:3000`.
 
 ### Database Migrations
 
-This project uses Prisma to manage database schema migrations.
-
-To apply migrations to your Supabase database, you first need to set up your local environment to connect to it. Create a `.env` file in the `packages/api` directory and add your Supabase database connection string to it:
-
-`packages/api/.env`:
-```
-DATABASE_URL="your-supabase-database-connection-string"
-```
-
-Then, you can run the migration command from the root of the project:
+To apply any pending database migrations to your Supabase database, run the following command from the root of the project:
 
 ```sh
-npx prisma migrate dev --schema=./packages/api/prisma/schema.prisma
+npm run db:migrate --workspace=@repo/db
 ```
-This will apply any pending migrations to your remote database.
-
-## Deployment
-
-The application is containerized using Docker, which means it can be deployed to any environment that supports Docker containers (e.g., a cloud provider like AWS, Azure, Google Cloud, or a private server).
-
-The general steps for a basic deployment would be:
-
-1.  **Build the Docker Images**: On your deployment server or in a CI/CD pipeline, build the production images:
-    ```sh
-    docker-compose build
-    ```
-
-2.  **Run the Containers**: Run the application using Docker Compose in detached mode:
-    ```sh
-    docker-compose up -d
-    ```
-
-This section provides a starting point for deployment. More detailed, provider-specific instructions for a full production setup (including database configuration, secrets management, and CI/CD automation) will be added as the project evolves.
-
-## Project Structure
-
-This project is a monorepo containing both the frontend and backend code. This structure simplifies development and dependency management.
-
-*   `packages/api`: The backend service. This is a Node.js application that will contain all the business logic, API endpoints, and database interactions.
-*   `packages/web`: The frontend application. This is a web application that will be built and served as static assets. It provides the user interface for the management dashboard and the B2B customer portal.
-*   `packages/shared`: A package for code that can be shared between the `api` and `web` packages, such as data types, validation schemas, etc.
+This command uses the `db:migrate` script defined in the `packages/db/package.json` file.
