@@ -32,6 +32,16 @@ docker-compose up
 *   The `api` service will be available at `http://localhost:3001`
 *   The `web` service will be available at `http://localhost:8080`
 
+### Database Migrations
+
+When you run the application for the first time, or after any changes to the database schema in `packages/api/prisma/schema.prisma`, you will need to apply the database migrations.
+
+You can do this by running the following command in a separate terminal window after the application is running with `docker-compose up`:
+
+```sh
+docker-compose exec api npx prisma migrate dev
+```
+
 ## Deployment
 
 The application is containerized using Docker, which means it can be deployed to any environment that supports Docker containers (e.g., a cloud provider like AWS, Azure, Google Cloud, or a private server).

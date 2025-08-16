@@ -5,6 +5,10 @@ services:
       dockerfile: packages/api/Dockerfile
     ports:
       - "3001:3001"
+    environment:
+      - DATABASE_URL=postgresql://user:password@db:5432/wholesaledb
+    depends_on:
+      - db
 
   web:
     build:
@@ -12,3 +16,18 @@ services:
       dockerfile: packages/web/Dockerfile
     ports:
       - "8080:80"
+
+  db:
+    image: postgres:14-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: wholesaledb
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
