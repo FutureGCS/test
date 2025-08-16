@@ -7,6 +7,7 @@ services:
       - "3001:3001"
     environment:
       - DATABASE_URL=postgresql://user:password@db:5432/wholesaledb
+      - JWT_SECRET=your-super-secret-key
     depends_on:
       - db
 

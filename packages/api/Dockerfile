@@ -1,26 +1,29 @@
-# Specifies the base image to use
+# Base image
 FROM node:18-alpine
 
-# Sets the working directory inside the container
 WORKDIR /app
 
-# Copies the root package.json to the container's working directory
-COPY package.json ./
+# Copy root package.json and lock file
+COPY package*.json ./
 
-# Copies all the packages from the local 'packages' directory to the container
-COPY packages ./packages
+# Copy all packages' package.json to leverage Docker cache
+COPY packages/api/package.json ./packages/api/
+COPY packages/web/package.json ./packages/web/
+COPY packages/shared/package.json ./packages/shared/
 
-# Installs all npm dependencies for all workspaces
+# Install all dependencies
 RUN npm install
 
-# Sets the working directory to the specific 'api' package
+# Copy the rest of the source code
+COPY . .
+
+# Set working directory to api package
 WORKDIR /app/packages/api
 
-# Creates a placeholder index.js file to ensure the container can run
-RUN echo "console.log('API service running');" > index.js
+# Build the TypeScript code
+RUN npm run build
 
-# Exposes port 3001 for the API service
 EXPOSE 3001
 
-# Defines the default command to run when the container starts
-CMD [ "node", "index.js" ]
+# Start the API service
+CMD [ "npm", "start" ]
