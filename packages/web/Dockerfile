@@ -1,32 +1,36 @@
-# Stage 1: Build the frontend application
+# Stage 1: Build the React application
 FROM node:18-alpine AS builder
 
-# Set the working directory for the entire monorepo
 WORKDIR /app
 
-# Copy root package.json
-COPY package.json ./
+# Copy root package.json and lock file
+COPY package*.json ./
 
-# Copy all packages
-COPY packages ./packages
+# Copy all packages' package.json to leverage Docker cache
+COPY packages/api/package.json ./packages/api/
+COPY packages/web/package.json ./packages/web/
+COPY packages/shared/package.json ./packages/shared/
 
-# Install all dependencies for all workspaces
+# Install all dependencies
 RUN npm install
 
-# Set the working directory to the web package
+# Copy the rest of the source code
+COPY . .
+
+# Set working directory to web package
 WORKDIR /app/packages/web
 
-# Run the build script
-# This will create the 'dist' directory with the built assets
+# Build the TypeScript code
 RUN npm run build
 
-# Stage 2: Serve the static assets with Nginx
+# Stage 2: Serve the static files with Nginx
 FROM nginx:1.21-alpine
 
 # Copy the built assets from the builder stage
 COPY --from=builder /app/packages/web/dist /usr/share/nginx/html
 
+# Copy the custom Nginx configuration
+COPY packages/web/nginx.conf /etc/nginx/conf.d/default.conf
+
 # Expose port 80 for the Nginx server
 EXPOSE 80
-
-# The default Nginx entrypoint will start the server
