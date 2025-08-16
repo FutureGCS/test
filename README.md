@@ -12,7 +12,20 @@ To get a local copy up and running, follow these simple steps.
 
 You need to have the following software installed on your machine:
 *   [Node.js](https://nodejs.org/) (which includes npm)
-*   [Docker](https://www.docker.com/get-started)
+*   [Docker](https://www.docker.com/)
+*   A [Supabase](https://supabase.com/) account and project.
+
+### Environment Variables
+
+This project uses environment variables to connect to Supabase services.
+
+1.  **Frontend (`web` package):** Create a `.env` file inside the `packages/web` directory by copying the example file:
+    ```sh
+    cp packages/web/.env.example packages/web/.env
+    ```
+    You will need to fill this file with your Supabase Project URL and Anon Key.
+
+2.  **Backend (`api` service):** The backend needs a direct connection string to the database. You must update the `DATABASE_URL` environment variable inside the `docker-compose.yml` file to point to your Supabase database. You can find this in your Supabase project's database settings.
 
 ### Installation
 
@@ -34,13 +47,21 @@ docker-compose up
 
 ### Database Migrations
 
-When you run the application for the first time, or after any changes to the database schema in `packages/api/prisma/schema.prisma`, you will need to apply the database migrations.
+This project uses Prisma to manage database schema migrations.
 
-You can do this by running the following command in a separate terminal window after the application is running with `docker-compose up`:
+To apply migrations to your Supabase database, you first need to set up your local environment to connect to it. Create a `.env` file in the `packages/api` directory and add your Supabase database connection string to it:
+
+`packages/api/.env`:
+```
+DATABASE_URL="your-supabase-database-connection-string"
+```
+
+Then, you can run the migration command from the root of the project:
 
 ```sh
-docker-compose exec api npx prisma migrate dev
+npx prisma migrate dev --schema=./packages/api/prisma/schema.prisma
 ```
+This will apply any pending migrations to your remote database.
 
 ## Deployment
 

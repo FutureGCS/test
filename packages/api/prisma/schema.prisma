@@ -8,10 +8,89 @@ datasource db {
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  password  String
-  role      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id    String @id @db.Uuid
+  email String @unique
+  role  String @default("customer")
+
+  @@map("users")
+}
+
+model Vendor {
+  id       String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name     String
+  products Product[]
+  payments Payment[]
+
+  @@map("vendors")
+}
+
+model Product {
+  id             String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name           String
+  sku            String?     @unique
+  cost_price     Int
+  selling_price  Int
+  stock_quantity Int         @default(0)
+  reorder_level  Int         @default(0)
+  vendor_id      String      @db.Uuid
+  vendor         Vendor      @relation(fields: [vendor_id], references: [id])
+  order_lines    OrderLine[]
+
+  @@map("products")
+}
+
+model Customer {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  business_name   String
+  account_balance Int       @default(0)
+  orders          Order[]
+  payments        Payment[]
+
+  @@map("customers")
+}
+
+model Order {
+  id           String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  customer_id  String      @db.Uuid
+  status       String      @default("Pending")
+  total_amount Int
+  customer     Customer    @relation(fields: [customer_id], references: [id])
+  order_lines  OrderLine[]
+  returns      Return[]
+
+  @@map("orders")
+}
+
+model OrderLine {
+  id             String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_id       String  @db.Uuid
+  product_id     String  @db.Uuid
+  quantity       Int
+  price_per_unit Int
+  order          Order   @relation(fields: [order_id], references: [id])
+  product        Product @relation(fields: [product_id], references: [id])
+
+  @@map("order_lines")
+}
+
+model Payment {
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  amount      Int
+  direction   String
+  status      String    @default("Pending")
+  customer_id String?   @db.Uuid
+  vendor_id   String?   @db.Uuid
+  customer    Customer? @relation(fields: [customer_id], references: [id])
+  vendor      Vendor?   @relation(fields: [vendor_id], references: [id])
+
+  @@map("payments")
+}
+
+model Return {
+  id       String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  order_id String @db.Uuid
+  status   String @default("Awaiting Return")
+  order    Order  @relation(fields: [order_id], references: [id])
+
+  @@map("returns")
 }

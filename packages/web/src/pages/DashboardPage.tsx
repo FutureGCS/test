@@ -1,51 +1,20 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
-
-interface User {
-  userId: number;
-  role: string;
-}
+import { useAuth } from '../context/AuthContext';
+import { supabase } from '../supabase';
 
 const DashboardPage = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState<User | null>(null);
-  const [error, setError] = useState('');
+  const { user } = useAuth();
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const response = await axios.get('/api/me');
-        setUser(response.data.user);
-      } catch (err) {
-        setError('Failed to fetch user data. Please try logging in again.');
-        localStorage.removeItem('authToken');
-        delete axios.defaults.headers.common['Authorization'];
-        navigate('/login');
-      }
-    };
-
-    const token = localStorage.getItem('authToken');
-    if (token) {
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        fetchUser();
-    } else {
-        navigate('/login');
-    }
-  }, [navigate]);
-
-  const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    delete axios.defaults.headers.common['Authorization'];
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     navigate('/login');
   };
 
-  if (error) {
-    return <div style={styles.container}><p style={styles.error}>{error}</p></div>;
-  }
-
   if (!user) {
-    return <div style={styles.container}><p>Loading...</p></div>;
+    // This should theoretically not happen due to ProtectedRoute, but as a fallback
+    return <div style={styles.container}><p>Loading user...</p></div>;
   }
 
   return (
@@ -55,12 +24,13 @@ const DashboardPage = () => {
         <button onClick={handleLogout} style={styles.button}>Logout</button>
       </div>
       <div style={styles.content}>
-        <p>Welcome! You are logged in as a user with ID: {user.userId} and Role: {user.role}.</p>
+        <p>Welcome! You are logged in as {user.email}.</p>
       </div>
     </div>
   );
 };
 
+// Styles based on the provided style guide
 const styles: { [key: string]: React.CSSProperties } = {
     container: {
         height: '100vh',
@@ -91,11 +61,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     content: {
         padding: '24px',
     },
-    error: {
-        color: '#DC2626',
-        textAlign: 'center',
-        padding: '24px',
-    }
 };
 
 export default DashboardPage;

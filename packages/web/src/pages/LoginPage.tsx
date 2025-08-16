@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { supabase } from '../supabase';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -12,21 +12,15 @@ const LoginPage = () => {
     e.preventDefault();
     setError('');
 
-    try {
-      const response = await axios.post('/auth/login', { email, password });
-      const { token } = response.data;
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-      if (token) {
-        localStorage.setItem('authToken', token);
-        axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-        navigate('/dashboard');
-      }
-    } catch (err) {
-      if (axios.isAxiosError(err) && err.response) {
-        setError(err.response.data.message || 'Login failed. Please check your credentials.');
-      } else {
-        setError('An unexpected error occurred.');
-      }
+    if (error) {
+      setError(error.message);
+    } else {
+      navigate('/dashboard');
     }
   };
 
