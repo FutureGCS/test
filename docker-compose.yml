@@ -8,6 +8,9 @@ services:
     environment:
       # This should be the connection string for your Supabase database
       - DATABASE_URL=postgresql://user:password@db.supabase.co:5432/postgres
+      # These are needed for the Supabase client
+      - SUPABASE_URL=your-supabase-url
+      - SUPABASE_ANON_KEY=your-supabase-anon-key
 
   web:
     build:

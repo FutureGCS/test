@@ -3,13 +3,15 @@ import express from 'express';
 const app = express();
 app.use(express.json());
 
-import apiRouter from './router/api';
+import vendorsRouter from './router/vendors';
+import productsRouter from './router/products';
 
 app.get('/', (req, res) => {
   res.json({ message: 'API is running' });
 });
 
-app.use('/api', apiRouter);
+app.use('/api/v1/vendors', vendorsRouter);
+app.use('/api/v1/products', productsRouter);
 
 const port = process.env.PORT || 3001;
 
