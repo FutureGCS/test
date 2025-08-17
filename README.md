@@ -51,12 +51,23 @@ npm install
 
 ## Development
 
+This project includes a Docker Compose setup to run a local PostgreSQL database, which is useful for development and testing.
+
+### Running the Local Database
+
+To start the local database server, run:
+```sh
+docker-compose up -d
+```
+
+### Running the Web Application
+
 To start the development server for the web application, run the following command from the root of the project:
 
 ```sh
 npm run dev
 ```
-This will start the Next.js application, usually available at `http://localhost:3000`.
+This will start the Next.js application, usually available at `http://localhost:3000`. The application will connect to your Supabase database by default, but you can point it to your local Dockerized database by changing the `DATABASE_URL` in your `.env` files.
 
 ### Database Migrations
 

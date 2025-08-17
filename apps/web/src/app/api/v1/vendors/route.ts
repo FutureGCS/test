@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@repo/db';
+import { getAllVendors, createVendor } from '@repo/db';
 import { getUser } from '@/lib/auth';
 
 // GET /api/v1/vendors
@@ -8,7 +8,7 @@ export async function GET() {
   if (!user) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
-  const vendors = await prisma.vendor.findMany();
+  const vendors = await getAllVendors();
   return NextResponse.json(vendors);
 }
 
@@ -22,8 +22,6 @@ export async function POST(request: Request) {
   if (!name) {
     return NextResponse.json({ message: 'Name is required' }, { status: 400 });
   }
-  const newVendor = await prisma.vendor.create({
-    data: { name },
-  });
+  const newVendor = await createVendor(name);
   return NextResponse.json(newVendor, { status: 201 });
 }

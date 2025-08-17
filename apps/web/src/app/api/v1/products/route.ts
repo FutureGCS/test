@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@repo/db';
+import { getAllProducts, createProduct } from '@repo/db';
 import { getUser } from '@/lib/auth';
 
 // GET /api/v1/products
@@ -8,9 +8,7 @@ export async function GET() {
   if (!user) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
-  const products = await prisma.product.findMany({
-    include: { vendor: true },
-  });
+  const products = await getAllProducts();
   return NextResponse.json(products);
 }
 
@@ -20,22 +18,12 @@ export async function POST(request: Request) {
   if (!user) {
     return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
   }
-  const { name, sku, cost_price, selling_price, stock_quantity, reorder_level, vendor_id } = await request.json();
+  const body = await request.json();
 
-  if (!name || !cost_price || !selling_price || !vendor_id) {
+  if (!body.name || !body.cost_price || !body.selling_price || !body.vendor_id) {
     return NextResponse.json({ message: 'Name, cost_price, selling_price, and vendor_id are required' }, { status: 400 });
   }
 
-  const newProduct = await prisma.product.create({
-    data: {
-      name,
-      sku,
-      cost_price,
-      selling_price,
-      stock_quantity,
-      reorder_level,
-      vendor_id,
-    },
-  });
+  const newProduct = await createProduct(body);
   return NextResponse.json(newProduct, { status: 201 });
 }
